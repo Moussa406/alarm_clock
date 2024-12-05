@@ -1,1 +1,1 @@
-Projet en cours effectuer seul.
+Projet en cours, effectuer seul.
