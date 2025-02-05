@@ -1,11 +1,17 @@
 from tkinter.ttk import *
 from tkinter import *
 from PIL import Image, ImageTk
+from pygame import mixer
+from datetime import datetime
+from time import sleep
+from threading import Thread
 
 #couleur
 bg_color = '#ffffff'
 color1 = '#000000'
 color2 = '#0000FF'
+
+mixer.init()
 
 window = Tk()
 window.title("Alarm clock")
@@ -61,10 +67,63 @@ combobox_periode['values']=('AM', 'PM')
 combobox_periode.current(0)
 combobox_periode.place(x=290, y=80)
 
+def activer_alarme():
+    print('activer alarme', selecte.get())
+    t = Thread(target= alarme)
+    t.start()
+
+def desactiver_alarm():
+    print('desactiver alarme', selecte.get())
+    mixer.music.stop()
+
+
+def music_alarme():
+    mixer.music.load('alarme.mp3')
+    mixer.music.play()
+    selecte.set(0)
+    
+def convertir_en_24h(heure, periode):
+    
+    if periode == 'PM' and heure != '12':
+        return str(int(heure) + 12)
+    elif periode == 'AM' and heure == '12':
+        return '00'
+    else:
+        return heure  
+    
+def alarme():
+    while True:
+        #control = 1
+        
+        alarme_hour = combobox_hour.get()
+        alarme_minute = combobox_minutes.get()
+        alarme_sec = combobox_secondes.get()
+        alarme_periode = combobox_periode.get()
+        alarme_periode = combobox_periode.get().upper()        
+        
+        alarme_hour_24h = convertir_en_24h(alarme_hour, alarme_periode)
+        
+        now = datetime.now()
+        heure = now.strftime("%H")
+        minute = now.strftime("%M")
+        seconde = now.strftime('%S')
+        
+        
+        if alarme_hour_24h == heure and alarme_minute == minute and alarme_sec == seconde:
+            window.after(0, music_alarme)  # Exécuter dans le thread principal
+            break  # Arrêter la boucle après avoir déclenché l'alarme
+        sleep(1)
+
 selecte = IntVar()
 
-bouton= Radiobutton(frame_bas, text="Activé",font=('Ivy 15 bold'),value= '1', bg=bg_color, fg=color1)
+bouton= Radiobutton(frame_bas, text="Activer",font=('Ivy 15 bold'),value= '1', bg=bg_color, fg=color1, command=activer_alarme, variable= selecte)
 bouton.place(x=125, y=200)
+
+bouton2= Radiobutton(frame_bas, text="Désactiver",font=('Ivy 15 bold'),value= '2', bg=bg_color, fg=color1, command=desactiver_alarm, variable=selecte)
+bouton2.place(x=210, y=200)
+
+
+
 
 
 
